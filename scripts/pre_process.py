@@ -9,18 +9,17 @@ from pyresample import image
 
 
 # defining the function for pre_process all the bands
-def pre_processGOES(nc_folder, latbox, lonbox, path2save,date, bands):
+def pre_processGOES(nc_folder, latbox, lonbox, path2save, date, bands):
     full_direc = os.listdir(nc_folder)  # creating a list of files in the given folder
     nc_files = [ii for ii in full_direc if ii.endswith('.nc')]  # creating a list with only NetCDF files in the given folder
     for band in range(0, len(nc_files)):  # iterating over all the bands
         g16_data_file = nc_files[band]  # selecting the NetCDF file according to the band
-        g16nc = Dataset(nc_folder + g16_data_file, 'r')  # opening the NetCDF file to read
+        g16nc = Dataset(os.path.join(nc_folder, g16_data_file) , 'r')  # opening the NetCDF file to read
         print('preprocessing band ', bands[band], g16_data_file)
         cmiValues = g16nc.variables['CMI'][:]  # selecting the CMI variable
-        timeValues = g16nc.variables['t'][:]
         latValues, lonValues, newArea, oldArea = reproj(nc_folder, band)  #calling the reprojection function and assigning the variables
         fileName = 'band'+str(band)+'/'+'goes_'+'{0:02d}'.format(date.hour)+'.nc'  # creating the file name
-        dataset = Dataset(path2save+fileName, 'w', format='NETCDF4', set_fill_off=True)  # creating the new netCDF file
+        dataset = Dataset(os.path.join(path2save, fileName), 'w', format='NETCDF4', set_fill_off=True)  # creating the new netCDF file
 
         # adding dimensions
         dataset.createDimension('time', None)

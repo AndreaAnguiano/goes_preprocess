@@ -10,45 +10,45 @@ fs = s3fs.S3FileSystem(anon=True)
 # List contents of GOES-16 bucket.
 fs.ls('s3://noaa-goes16/')
 # define path of data, product and date
-data_path = '/DATA/GOES/data/'
+data_path = '../data/'
 goes = 'noaa-goes16'
 product = 'ABI-L2-CMIPF'
-for timeindx in range(0,24):
-    year = str(datetime.now().year)
-    day_of_year = str(datetime(2019,11,11).timetuple().tm_yday)
-    scans_start_hour = "{0:02d}".format(datetime(2019,11,11,timeindx).hour)
-    print(scans_start_hour)
-    file_path = os.path.join(goes, product, year, day_of_year, scans_start_hour)
+tod = datetime(2019, 7, 7)
+year = str(tod.year)
+day_of_year = str(tod.timetuple().tm_yday)
+scans_start_hour = "{0:02d}".format(tod.hour)
+file_path = os.path.join(goes, product, year, day_of_year, scans_start_hour)
 
-    # Note: the `s3://` is not required
-    files = np.array(fs.ls(file_path))
-    print(file_path)
-    bands = ['C01', 'C03', 'C13']
-    filteredFiles = np.array([[f for f in files if 'M6C01' in f][0], [f for f in files if 'M6C03' in f][0], [f for f in files if 'M6C13' in f][0]])
+# Note: the `s3://` is not required
+files = np.array(fs.ls(file_path))
+bands = ['C01', 'C03', 'C13']
+filteredFiles = np.array([[f for f in files if 'M6C01' in f][0], [f for f in files if 'M6C03' in f][0], [f for f in files if 'M6C13' in f][0]])
 
 
-    # create the download path
-    today = datetime(2019,11,11,timeindx)
-    today_path = str(today.year) + '-' + '{0:02d}'.format(today.month) + '-'+'{0:02d}'.format(today.day)
-    if not os.path.exists(data_path+today_path):
-        os.mkdir(data_path+today_path)
-        print('Daily directory created')
-    else:
-        print('Daily directory already exists')
-    # Download the files
+# create the download path
+today_path = str(tod.year) + '-' + '{0:02d}'.format(tod.month) + '-'+'{0:02d}'.format(tod.day)
+abs_path = os.path.abspath(os.path.join(data_path, today_path))
+pre_process_path = os.path.join(abs_path, 'pre_process')
 
-    [fs.get(filteredFiles[i], data_path+today_path + '/'+filteredFiles[i].split('/')[-1]) for i in range(0, len(filteredFiles))]
+if not os.path.exists(abs_path):
+    os.mkdir(abs_path)
+    print('Data directory created')
+else:
+    print('Data directory already exists')
+# Download the files
 
-    if not os.path.exists(data_path+today_path + '/post_process/'):
-        os.mkdir(data_path+today_path + '/post_process/')
-        [os.mkdir(data_path + today_path + '/post_process/' + 'band' + str(indx) + '/') for indx in range(0, len(filteredFiles))]
-        print('Daily directory created')
-    else:
-        print('Daily directory already exists')
+[fs.get(filteredFiles[i], abs_path + '/' + filteredFiles[i].split('/')[-1]) for i in range(0, len(filteredFiles))]
 
-    latbox = [18.2, 31]
-    lonbox = [-98, -83]
+if not os.path.exists(pre_process_path):
+    os.mkdir(pre_process_path)
+    [os.mkdir(os.path.join(pre_process_path, 'band' + str(indx))) for indx in range(0, len(filteredFiles))]
+    print('Daily directory created')
+else:
+    print('Daily directory already exists')
 
-    path2save = data_path+today_path+'/post_process/'
-    pre_processGOES(data_path+today_path+'/', latbox, lonbox, path2save,today, bands)
-    [os.remove(f) for f in os.listdir(data_path+today_path) if f!='post_process']
+latbox = [18.2, 31]
+lonbox = [-98, -83]
+
+pre_processGOES(abs_path, latbox, lonbox, pre_process_path, tod, bands)
+
+[os.remove(f) for f in os.listdir(abs_path) if f != 'post_process']
