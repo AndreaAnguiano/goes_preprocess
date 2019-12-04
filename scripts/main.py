@@ -40,7 +40,7 @@ else:
 [fs.get(filteredFiles[i], abs_path + '/' + filteredFiles[i].split('/')[-1]) for i in range(0, len(filteredFiles))]
 
 if not os.path.exists(post_process_path):
-    os.mkdir(pre_process_path)
+    os.mkdir(post_process_path)
     [os.mkdir(os.path.join(post_process_path, 'band' + str(indx))) for indx in range(0, len(filteredFiles))]
     print('Daily directory created')
 else:
