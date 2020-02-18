@@ -15,7 +15,7 @@ goes = 'noaa-goes16'
 product = 'ABI-L2-CMIPF'
 
 year = str(datetime.now().year)
-day_of_year = str(datetime.now().timetuple().tm_yday)
+day_of_year = "{0:03d}".format(datetime.now().timetuple().tm_yday)
 scans_start_hour = "{0:02d}".format(datetime.now().hour)
 file_path = os.path.join(goes, product, year, day_of_year, scans_start_hour)
 
@@ -27,9 +27,11 @@ filteredFiles = np.array([[f for f in files if 'M6C01' in f][0], [f for f in fil
 
 # create the download paths
 today_path = str(datetime.now().year) + '-' + '{0:02d}'.format(datetime.now().month) + '-'+'{0:02d}'.format(datetime.now().day)
+print(os.path.abspath(os.path.join(data_path, today_path)))
+
 abs_path = os.path.abspath(os.path.join(data_path, today_path))
 post_process_path = os.path.join(abs_path, 'post_process')
-
+print(abs_path)
 if not os.path.exists(abs_path):
     os.mkdir(abs_path)
     print('Data directory created')

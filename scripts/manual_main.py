@@ -13,9 +13,9 @@ fs.ls('s3://noaa-goes16/')
 data_path = '../../data/'
 goes = 'noaa-goes16'
 product = 'ABI-L2-CMIPF'
-tod = datetime(2019, 7, 7)
+tod = datetime(2019, 12, 2,0)
 year = str(tod.year)
-day_of_year = str(tod.timetuple().tm_yday)
+day_of_year = "{0:03d}".format(datetime.now().timetuple().tm_yday)
 scans_start_hour = "{0:02d}".format(tod.hour)
 file_path = os.path.join(goes, product, year, day_of_year, scans_start_hour)
 
